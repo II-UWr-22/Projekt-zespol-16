@@ -1,23 +1,30 @@
-import pygame
+import tkinter as tk
 import random
 import sys
-pygame.init()
-window_size = (600, 600)
-screen = pygame.display.set_mode(window_size)
-pygame.display.set_caption("Super Saper")
-background_colour = (200,200,200)
-screen.fill(background_colour)
-game_over = False
-class state:
-    def init(self):
-        self.board_size = (10, 10)
-        self.mines = (self.board_size[0]-1)*(self.board_size[1]-1)
-        self.board = [[None for _ in range(self.board_size[0])] for _ in range(self.board_size[1])]
-while not game_over:
-    pygame.display.flip()
-    font = pygame.font.SysFont(None, 72)
-    img = font.render('       SUPER SAPER', True, 'Dark Green')
-    screen.blit(img, (20, 20))
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            game_over = True
+X = 20
+Y = 30
+
+
+def init_window():
+    root = tk.Tk()
+    root.geometry("800x600")
+    root.title("Super Saper")
+    return root
+
+
+def init_panel(root):
+    bomb_counter = tk.Label(root)
+    bomb_counter.grid(row=0, column=0)
+    bomb_counter['text'] = '0050'
+    face = tk.Button(root)
+    face.grid(row=0, column=X//2)
+    clock = tk.Label(root)
+    clock.grid(row=0, column=Y-10)
+    clock['text'] = '0000'
+    panel = [bomb_counter, face, clock]
+    return panel
+
+if __name__ == "__main__":
+    root = init_window()
+    panel = init_panel(root)
+    root.mainloop()

@@ -16,7 +16,12 @@ for i in range(X):
     for j in range(Y):
         row_of_bombs.append(9)
     board_of_bombs.append(row_of_bombs)
-
+clickable = []
+for i in range(X):
+    row_of_clicks = []
+    for j in range(Y):
+        row_of_clicks.append(1)
+    clickable.append(row_of_clicks)
 
 # Inicjalizacja głownego okienka gry
 def init_window():
@@ -66,6 +71,13 @@ def reset_game(root):
         for j in range(Y):
             row_of_bombs.append(9)
         board_of_bombs.append(row_of_bombs)
+    global clickable
+    clickable = []
+    for i in range(X):
+        row_of_clicks = []
+        for j in range(Y):
+            row_of_clicks.append(1)
+        clickable.append(row_of_clicks)
     przyciski = init_buttons(root)
     update_flag_counter(root, panel[0])
 
@@ -138,24 +150,50 @@ def init_board_of_bombs(button, buttons):
                 board_of_bombs[i][j] = sasiedzi
 
 
+def change(index, buttons, value):
+    dx = index % X
+    dy = index // X
+    buttons[index].unbind('<Button-3>')
+    buttons[index].unbind('<Button-1>')
+    if value == 0:
+        buttons[index] = tk.Label(root, bg ="bisque")
+        buttons[index].grid(column=dx + 1, row=dy + 1)
+    else:
+        buttons[index] = tk.Label(root, text=str(value))
+        buttons[index].grid(column=dx + 1, row=dy + 1)
+
+
+def full(x, y, buttons):
+    global board_of_bombs
+    if board_of_bombs[x][y] == 0:
+        for i in range(x - 1, x + 2):
+            for j in range(y - 1, y + 2):
+                if i >= 0 and i < X and j >= 0 and j < Y:
+                    if clickable[i][j] == 1:
+                        indekz = j * X + i
+                        change(indekz, buttons, board_of_bombs[i][j])
+                        clickable[i][j] = 0
+                        full(i, j, buttons)
+
+
 def left_click_detonate(button, buttons):
     index = buttons.index(button)
     dy = index // X
     dx = index % X
+    global clickable
+    clickable[dx][dy] = 0
     global clicks
     if clicks == 0:
         init_board_of_bombs(button, buttons)
         clicks += 1
     value = board_of_bombs[dx][dy]
+    if value == 0:
+        full(dx, dy, buttons)
     if value == -1:
-        pass
+        exit(1)
     else:
-        buttons[index].unbind('<Button-3>')
-        buttons[index].unbind('<Button-1>')
-        buttons[index] = tk.Label(root, text=str(value))
-        buttons[index].grid(column=dx + 1, row=dy + 1)
-        buttons[index].unbind('<Button-3>')
-        buttons[index].unbind('<Button-1>')
+        change(index, buttons, value)
+
 
 
 # Funkcja flagująca (dodać obrazek!)
@@ -176,3 +214,4 @@ if __name__ == "__main__":
     panel = init_panel(root)
     buttons = init_buttons(root)
     root.mainloop()
+    

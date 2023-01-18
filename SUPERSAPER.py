@@ -1,6 +1,8 @@
 import tkinter as tk
 import random
+
 # Globalne zmienne
+clicks = 0
 X = 30
 Y = 15
 bomb_count = 50
@@ -8,6 +10,12 @@ timer = 0
 flags = bomb_count
 detonated = 0
 end = False
+board_of_bombs = []
+for i in range(X):
+    row_of_bombs = []
+    for j in range(Y):
+        row_of_bombs.append(9)
+    board_of_bombs.append(row_of_bombs)
 
 
 # Inicjalizacja głownego okienka gry
@@ -49,7 +57,17 @@ def reset_game(root):
     flags = bomb_count
     global end
     end = False
+    global clicks
+    clicks = 0
+    global board_of_bombs
+    board_of_bombs = []
+    for i in range(X):
+        row_of_bombs = []
+        for j in range(Y):
+            row_of_bombs.append(9)
+        board_of_bombs.append(row_of_bombs)
     przyciski = init_buttons(root)
+    update_flag_counter(root, panel[0])
 
 
 # Funkcja licząca czas gry
@@ -83,33 +101,61 @@ def update_flag_counter(root, flag):
 # Funkcja inicjalizująca guziki
 def init_buttons(root):
     buttons = [tk.Button(root, image=None, width=1, height=1) for i in range(X * Y)]
-    for y in range(Y):
-        for x in range(X):
+    for x in range(X):
+        for y in range(Y):
             coordinate = y * X + x
             buttons[coordinate].grid(row=y + 1, column=x + 1)
+            buttons[coordinate].bind('<Button-1>', lambda event, button=buttons[coordinate]: left_click_detonate(button, buttons))
             buttons[coordinate].bind('<Button-3>', lambda event, button=buttons[coordinate]: right_click_flag(button, panel))
     return buttons
 
 
-def init_preboard():
-    pass
+def init_board_of_bombs(button, buttons):
+    global board_of_bombs
+    index = buttons.index(button)
+    dx = index % X
+    dy = index // X
+    for i in range(dx - 1, dx + 2):
+        for j in range(dy - 1, dx + 2):
+            if i >= 0 and i < X and j >= 0 and j < Y:
+                board_of_bombs[i][j] = 0
+    minescopy = bomb_count
+    while minescopy > 0:
+        randx = random.randint(0, X - 1)
+        randy = random.randint(0, Y - 1)
+        if board_of_bombs[randx][randy] == 9:
+            board_of_bombs[randx][randy] = -1
+            minescopy -= 1
+    for i in range(X):
+        for j in range(Y):
+            if board_of_bombs[i][j] != -1:
+                sasiedzi = 0
+                for k in range(i - 1, i + 2):
+                    for z in range(j - 1, j + 2):
+                        if k >= 0 and k < X and z >= 0 and z < Y:
+                            if board_of_bombs[k][z] == -1:
+                                sasiedzi += 1
+                board_of_bombs[i][j] = sasiedzi
 
 
-def init_board_of_bombs():
-    board_of_bombs = []
-    for y in range(Y):
-        row = []
-        for x in range(X):
-            row.append(0)
-        board_of_bombs.append(row)
-    licznik_bomb = flags
-    while licznik_bomb > 0:
-        x = random.randint(0, X - 1)
-        y = random.randint(0, Y - 1)
-        if board_of_bombs[x][y] == 0:
-            board_of_bombs[x][y] = 1
-            licznik_bomb -= 1
-    return board_of_bombs
+def left_click_detonate(button, buttons):
+    index = buttons.index(button)
+    dy = index // X
+    dx = index % X
+    global clicks
+    if clicks == 0:
+        init_board_of_bombs(button, buttons)
+        clicks += 1
+    value = board_of_bombs[dx][dy]
+    if value == -1:
+        pass
+    else:
+        buttons[index].unbind('<Button-3>')
+        buttons[index].unbind('<Button-1>')
+        buttons[index] = tk.Label(root, text=str(value))
+        buttons[index].grid(column=dx + 1, row=dy + 1)
+        buttons[index].unbind('<Button-3>')
+        buttons[index].unbind('<Button-1>')
 
 
 # Funkcja flagująca (dodać obrazek!)
@@ -127,7 +173,6 @@ def right_click_flag(button, panel):
 # Główny loop gry
 if __name__ == "__main__":
     root = init_window()
-    flaga = tk.PhotoImage(file='flaga.png')
     panel = init_panel(root)
     buttons = init_buttons(root)
     root.mainloop()

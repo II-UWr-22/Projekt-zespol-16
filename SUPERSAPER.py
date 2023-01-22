@@ -53,7 +53,8 @@ def zasadygry():
                      "Źródło: https://pl.wikipedia.org/wiki/Saper_(gra_komputerowa)\n")
     label.pack()
     zasady.resizable(False, False)
-    zasady.iconphoto(False, tk.PhotoImage(file='flaga.png'))
+    zasady.iconphoto(False, tk.PhotoImage(file='znakzapytania.png'))
+    zasady.mainloop()
 
 
 def set_size(x):
@@ -92,6 +93,7 @@ def size_settings():
     tbg = tk.Canvas(siz, height=150, width=120, bg='white')
     tbg.pack(pady=0)
     tbg.create_text((60, 55), anchor='center', text="10 x 10", fill='black', font='Digital-7 20 bold')
+    siz.iconphoto(False, tk.PhotoImage(file='zebatka.png'))
     siz.mainloop()
 
 
@@ -121,6 +123,7 @@ def time_settings():
     tbg = tk.Canvas(tim, height=100, width=300, bg='black')
     tbg.pack(pady=10)
     tbg.create_text((150, 40), text=str(300), fill='aquamarine', font='Digital-7 20 bold')
+    tim.iconphoto(False, tk.PhotoImage(file='zebatka.png'))
     tim.mainloop()
 
 # Inicjalizacja głownego okienka gry

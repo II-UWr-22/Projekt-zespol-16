@@ -317,9 +317,18 @@ def change(index, buttons, value, button):
         buttons[index] = tk.Label(root, bg="bisque")
         buttons[index].grid(column=dx + 1, row=dy + 1)
     else:
-        buttons[index] = tk.Label(root, text=str(value))
+        buttons[index] = tk.Label(root, text=str(value), fg=number_colors(value))
         buttons[index].grid(column=dx + 1, row=dy + 1)
 
+def number_colors(value):
+    if value == 1: return "blue4"
+    if value == 2: return "green4"
+    if value == 3: return "sienna4"
+    if value == 4: return "Hotpink2"
+    if value == 5: return "turquoise1"
+    if value == 6: return "darkorchid"
+    if value == 7: return "orange"
+    if value == 8: return "dark khaki"
 
 def full(x, y, buttons, button):
     global board_of_bombs, flags

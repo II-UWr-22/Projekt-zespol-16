@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import *
 import random
 
 # Globalne zmienne
@@ -8,9 +9,12 @@ buttons = None
 clicks = 0
 X = 30
 Y = 15
-bomb_count = 50
+bomb_count = (X * Y) // 10
+win_count = 0
 timer = 0
+time_limit = 9999
 flags = bomb_count
+toplev = 0
 detonated = 0
 end = False
 board_of_bombs = []
@@ -25,17 +29,29 @@ for i in range(X):
     for j in range(Y):
         row_of_clicks.append(1)
     clickable.append(row_of_clicks)
+winn = []
+for i in range(X):
+    row_of_winn = []
+    for j in range(Y):
+        row_of_winn.append(0)
+    winn.append(row_of_winn)
+
 
 # Starting screen
 def start_screen():
     root1 = tk.Tk()
     root1.geometry("300x200")
     root1.title("Super Saper")
+    screen_width = root1.winfo_screenwidth()
+    screen_height = root1.winfo_screenheight()
+    x_cordinate = int((screen_width / 2) - (300 / 2))
+    y_cordinate = int((screen_height / 2) - (200 / 2))
+    root1.geometry("{}x{}+{}+{}".format(300, 200, x_cordinate, y_cordinate))
     label1 = tk.Label(root1, text="Super Saper", font="Times 40 italic bold")
     label1.pack()
-    button = tk.Button(root1, text=">START<", height=2, width=20,command=init_window)
+    button = tk.Button(root1, text=">START<", height=2, width=20, command=init_window)
     button.pack()
-    ustawienia = tk.Button(root1, text=">USTAWIENIA<", height=2, width=20,command=size_settings)
+    ustawienia = tk.Button(root1, text=">USTAWIENIA<", height=2, width=20, command=size_settings)
     ustawienia.pack()
     zasady = tk.Button(root1, text=">JAK GRAĆ?<", height=2, width=20, command=zasadygry)
     zasady.pack()
@@ -43,14 +59,21 @@ def start_screen():
     root1.iconphoto(False, tk.PhotoImage(file='flaga.png'))
     return root1
 
+
 def zasadygry():
     zasady = tk.Toplevel()
     zasady.geometry("600x75")
+    screen_width = zasady.winfo_screenwidth()
+    screen_height = zasady.winfo_screenheight()
+    x_cordinate = int((screen_width / 2) - (600 / 2))
+    y_cordinate = int((screen_height / 2) - (75 / 2))
+    zasady.geometry("{}x{}+{}+{}".format(600, 75, x_cordinate, y_cordinate))
     zasady.title("Jak grać?")
-    label = tk.Label(zasady, text="Gra polega na odkrywaniu na planszy poszczególnych pól w taki sposób, aby nie natrafić na minę.\n "
-                                  "Na każdym z odkrytych pól napisana jest liczba min, \n"
-                                  "które bezpośrednio stykają się z danym polem (od zera do ośmiu).\n"
-                     "Źródło: https://pl.wikipedia.org/wiki/Saper_(gra_komputerowa)\n")
+    label = tk.Label(zasady,
+                     text="Gra polega na odkrywaniu na planszy poszczególnych pól w taki sposób, aby nie natrafić na minę.\n "
+                          "Na każdym z odkrytych pól napisana jest liczba min, \n"
+                          "które bezpośrednio stykają się z danym polem (od zera do ośmiu).\n"
+                          "Źródło: https://pl.wikipedia.org/wiki/Saper_(gra_komputerowa)\n")
     label.pack()
     zasady.resizable(False, False)
     zasady.iconphoto(False, tk.PhotoImage(file='znakzapytania.png'))
@@ -58,32 +81,38 @@ def zasadygry():
 
 
 def set_size(x):
-    global tbg, X, Y
+    global tbg, X, Y, bomb_count
     X = x
-    Y = 2 * x
-    size = f"{x} x {2 * x}"
+    Y = x // 2
+    bomb_count = (X * Y) // 10
+    size = f"{x} x {x // 2}"
     tbg.itemconfigure(1, text=size)
 
 
 def set_time(x):
-    global tbg, timer
-    timer = x * 60
-    tbg.itemconfigure(1, text=timer)
+    global tbg, time_limit
+    time_limit = x * 60
+    tbg.itemconfigure(1, text=str(time_limit))
 
 
 def size_settings():
     siz = tk.Toplevel()
     siz.geometry('420x280')
     siz.title("Size settings")
+    screen_width = siz.winfo_screenwidth()
+    screen_height = siz.winfo_screenheight()
+    x_cordinate = int((screen_width / 2) - (420 / 2))
+    y_cordinate = int((screen_height / 2) - (280 / 2))
+    siz.geometry("{}x{}+{}+{}".format(420, 280, x_cordinate, y_cordinate))
     top = tk.Frame(siz)
     top.pack(side=tk.TOP, pady=30)
     bottom = tk.Frame(siz)
     bottom.pack(side=tk.BOTTOM, pady=30)
-    s1 = tk.Button(siz, text='size 1', command=lambda: set_size(15))
+    s1 = tk.Button(siz, text='Easy', command=lambda: set_size(20))
     s1.pack(in_=top, side=tk.LEFT, padx=25)
-    s2 = tk.Button(siz, text='size 2', command=lambda: set_size(20))
+    s2 = tk.Button(siz, text='Medium', command=lambda: set_size(30))
     s2.pack(in_=top, side=tk.LEFT, padx=25)
-    s3 = tk.Button(siz, text='size 3', command=lambda: set_size(25))
+    s3 = tk.Button(siz, text='Hard', command=lambda: set_size(40))
     s3.pack(in_=top, side=tk.LEFT, padx=25)
     q1 = tk.Button(siz, text='back', command=lambda: siz.destroy())
     q1.pack(in_=bottom, side=tk.LEFT, padx=5)
@@ -92,7 +121,7 @@ def size_settings():
     global tbg
     tbg = tk.Canvas(siz, height=150, width=120, bg='white')
     tbg.pack(pady=0)
-    tbg.create_text((60, 55), anchor='center', text="10 x 10", fill='black', font='Digital-7 20 bold')
+    tbg.create_text((60, 55), anchor='center', text="20 x 10", fill='black', font='Digital-7 20 bold')
     siz.iconphoto(False, tk.PhotoImage(file='zebatka.png'))
     siz.mainloop()
 
@@ -101,6 +130,12 @@ def time_settings():
     tim = tk.Tk()
     tim.geometry('420x280')
     tim.title("Time settings")
+    tim.anchor(tk.CENTER)
+    screen_width = tim.winfo_screenwidth()
+    screen_height = tim.winfo_screenheight()
+    x_cordinate = int((screen_width / 2) - (420 / 2))
+    y_cordinate = int((screen_height / 2) - (280 / 2))
+    tim.geometry("{}x{}+{}+{}".format(420, 280, x_cordinate, y_cordinate))
     top = tk.Frame(tim)
     top.pack(side=tk.TOP, pady=30)
     bottom = tk.Frame(tim)
@@ -115,7 +150,7 @@ def time_settings():
     t10.pack(in_=top, side=tk.LEFT, padx=5)
     t15 = tk.Button(tim, text='15 minutes', command=lambda: set_time(15))
     t15.pack(in_=top, side=tk.LEFT, padx=5)
-    q1 = tk.Button(tim, text='back', command=lambda: size_settings())
+    q1 = tk.Button(tim, text='back', command=lambda: [tim.destroy(), size_settings()])
     q1.pack(in_=bottom, side=tk.LEFT, padx=5)
     q2 = tk.Button(tim, text='ok', command=lambda: tim.destroy())
     q2.pack(in_=bottom, side=tk.LEFT, padx=5)
@@ -126,18 +161,19 @@ def time_settings():
     tim.iconphoto(False, tk.PhotoImage(file='zebatka.png'))
     tim.mainloop()
 
+
 # Inicjalizacja głownego okienka gry
 def init_window():
-    global root, panel, buttons
+    global root, panel, buttons, toplev
     root = tk.Toplevel()
-    root.geometry("600x600")
+    root.geometry(str(X * 30) + 'x' + str(X * 25))
     root.title("Super Saper")
     root.anchor(tk.CENTER)
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-    x_cordinate = int((screen_width / 2) - (600 / 2))
-    y_cordinate = int((screen_height / 2) - (600 / 2))
-    root.geometry("{}x{}+{}+{}".format(600, 600, x_cordinate, y_cordinate))
+    x_cordinate = int((screen_width / 2) - (X * 30 / 2))
+    y_cordinate = int((screen_height / 2) - (X * 25 / 2))
+    root.geometry("{}x{}+{}+{}".format(X * 30, X * 25, x_cordinate, y_cordinate))
     root.iconphoto(False, tk.PhotoImage(file='flaga.png'))
     flag = tk.Label(root, bg="black", fg="aquamarine", font=("Digital-7", 30))
     flag.grid(row=0, column=1, columnspan=7, ipadx=6, pady=25)
@@ -158,7 +194,10 @@ def init_window():
                                      lambda event, button=buttons[coordinate]: left_click_detonate(button, buttons))
             buttons[coordinate].bind('<Button-3>',
                                      lambda event, button=buttons[coordinate]: right_click_flag(button, panel))
+    reset_game(root)
+    toplev = root
     root.mainloop()
+
 
 # Funkcja inicjalizująca panel do gry
 
@@ -173,6 +212,8 @@ def reset_game(root):
     end = False
     global clicks
     clicks = 0
+    global detonated
+    detonated = 0
     global board_of_bombs
     board_of_bombs = []
     for i in range(X):
@@ -193,8 +234,10 @@ def reset_game(root):
 
 # Funkcja licząca czas gry
 def update_clock(root, clock):
-    global timer
+    global timer, end
     timer += 1
+    if timer >= time_limit:
+        toplev.destroy()
     if timer < 10:
         clock['text'] = "000" + str(timer)
     elif timer < 100:
@@ -226,8 +269,10 @@ def init_buttons(root):
         for y in range(Y):
             coordinate = y * X + x
             buttons[coordinate].grid(row=y + 1, column=x + 1)
-            buttons[coordinate].bind('<Button-1>', lambda event, button=buttons[coordinate]: left_click_detonate(button, buttons))
-            buttons[coordinate].bind('<Button-3>', lambda event, button=buttons[coordinate]: right_click_flag(button, panel))
+            buttons[coordinate].bind('<Button-1>',
+                                     lambda event, button=buttons[coordinate]: left_click_detonate(button, buttons))
+            buttons[coordinate].bind('<Button-3>',
+                                     lambda event, button=buttons[coordinate]: right_click_flag(button, panel))
     return buttons
 
 
@@ -259,33 +304,43 @@ def init_board_of_bombs(button, buttons):
                 board_of_bombs[i][j] = sasiedzi
 
 
-def change(index, buttons, value):
+def change(index, buttons, value, button):
+    global flags, winn, win_count
     dx = index % X
     dy = index // X
     buttons[index].unbind('<Button-3>')
     buttons[index].unbind('<Button-1>')
     if value == 0:
-        buttons[index] = tk.Label(root, bg ="bisque")
+        if winn[dx][dy] == 0:
+            win_count += 1
+            winn[dx][dy] = 1
+        buttons[index] = tk.Label(root, bg="bisque")
         buttons[index].grid(column=dx + 1, row=dy + 1)
     else:
         buttons[index] = tk.Label(root, text=str(value))
         buttons[index].grid(column=dx + 1, row=dy + 1)
 
 
-def full(x, y, buttons):
-    global board_of_bombs
+def full(x, y, buttons, button):
+    global board_of_bombs, flags
     if board_of_bombs[x][y] == 0:
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
                 if i >= 0 and i < X and j >= 0 and j < Y:
                     if clickable[i][j] == 1:
                         indekz = j * X + i
-                        change(indekz, buttons, board_of_bombs[i][j])
+                        value = board_of_bombs[i][j]
+                        if buttons[indekz]['text'] == "F":
+                            flags += 1
+                            flag = panel[0]
+                            update_flag_counter(root, flag)
+                        change(indekz, buttons, board_of_bombs[i][j], button)
                         clickable[i][j] = 0
-                        full(i, j, buttons)
+                        full(i, j, buttons, button)
 
 
 def left_click_detonate(button, buttons):
+    print(win_count, bomb_count)
     index = buttons.index(button)
     dy = index // X
     dx = index % X
@@ -297,12 +352,14 @@ def left_click_detonate(button, buttons):
         clicks += 1
     value = board_of_bombs[dx][dy]
     if value == 0:
-        full(dx, dy, buttons)
+        full(dx, dy, buttons, button)
     if value == -1:
-        exit(1)
+        toplev.destroy()
     else:
-        change(index, buttons, value)
-
+        change(index, buttons, value, button)
+    print(win_count, bomb_count)
+    if win_count == bomb_count:
+        toplev.destroy()
 
 
 # Funkcja flagująca (dodać obrazek!)
@@ -321,4 +378,3 @@ def right_click_flag(button, panel):
 if __name__ == "__main__":
     root1 = start_screen()
     root1.mainloop()
-    

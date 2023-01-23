@@ -354,6 +354,19 @@ def left_click_detonate(button, buttons):
     if value == 0:
         full(dx, dy, buttons, button)
     if value == -1:
+        losing = tk.Toplevel()
+        losing.geometry("300x50")
+        screen_width = losing.winfo_screenwidth()
+        screen_height = losing.winfo_screenheight()
+        x_cordinate = int((screen_width / 2) - (300 / 2))
+        y_cordinate = int((screen_height / 2) - (50 / 2))
+        losing.geometry("{}x{}+{}+{}".format(300, 50, x_cordinate, y_cordinate))
+        losing.resizable(False, False)
+        przegrana = tk.Label(losing, text="Przegrałeś!!!\n"
+                                          "Spróbuj ponowanie klikając START.", font="Times 18 italic bold")
+        przegrana.pack()
+        losing.after(3000, lambda:losing.destroy())
+
         toplev.destroy()
     else:
         change(index, buttons, value, button)

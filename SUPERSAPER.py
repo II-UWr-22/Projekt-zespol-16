@@ -15,8 +15,6 @@ timer = 0
 time_limit = 9999
 flags = bomb_count
 toplev = 0
-detonated = 0
-end = False
 board_of_bombs = []
 for i in range(X):
     row_of_bombs = []
@@ -29,12 +27,6 @@ for i in range(X):
     for j in range(Y):
         row_of_clicks.append(1)
     clickable.append(row_of_clicks)
-winn = []
-for i in range(X):
-    row_of_winn = []
-    for j in range(Y):
-        row_of_winn.append(0)
-    winn.append(row_of_winn)
 
 
 # Starting screen
@@ -165,24 +157,24 @@ def time_settings():
 # Inicjalizacja głownego okienka gry
 def init_window():
     global root, panel, buttons, toplev
-    root = tk.Toplevel()
-    root.geometry(str(X * 30) + 'x' + str(X * 25))
+    root = tk.Toplevel(bg="azure3")
+    root.geometry(str(X * 25) + 'x' + str(X * 20))
     root.title("Super Saper")
     root.anchor(tk.CENTER)
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-    x_cordinate = int((screen_width / 2) - (X * 30 / 2))
-    y_cordinate = int((screen_height / 2) - (X * 25 / 2))
-    root.geometry("{}x{}+{}+{}".format(X * 30, X * 25, x_cordinate, y_cordinate))
-    root.iconphoto(False, tk.PhotoImage(file='flaga.png'))
+    x_cordinate = int((screen_width / 2) - (X * 25 / 2))
+    y_cordinate = int((screen_height / 2) - (X * 20 / 2))
+    root.geometry("{}x{}+{}+{}".format(X * 25, X * 20, x_cordinate, y_cordinate))
+    root.iconphoto(False, tk.PhotoImage(file='bomba.png'))
     flag = tk.Label(root, bg="black", fg="aquamarine", font=("Digital-7", 30))
-    flag.grid(row=0, column=1, columnspan=7, ipadx=6, pady=25)
+    flag.grid(row=0, column=1, columnspan=7, ipadx=7, pady=25)
     update_flag_counter(root, flag)
-    face = tk.Button(root, width=2, image=None)
+    face = tk.Button(root, image=zdjecie)
     face.grid(row=0, column=(X // 2) - 1, columnspan=3, pady=25)
     face.bind('<Button-1>', lambda event: reset_game(root))
     clock = tk.Label(root, bg="black", fg="aquamarine", font=("Digital-7", 30))
-    clock.grid(row=0, column=X - 6, columnspan=7, ipadx=6, pady=25)
+    clock.grid(row=0, column=X - 6, columnspan=7, ipadx=7, pady=25)
     update_clock(root, clock)
     panel = [flag, face, clock]
     buttons = [tk.Button(root, image=None, width=1, height=1) for i in range(X * Y)]
@@ -199,21 +191,16 @@ def init_window():
     root.mainloop()
 
 
-# Funkcja inicjalizująca panel do gry
-
-
 # Funkcja resetujące grę gdy kliknie się lewy przycisk myszy w buźkę
 def reset_game(root):
     global timer
     timer = 0
     global flags
     flags = bomb_count
-    global end
-    end = False
     global clicks
     clicks = 0
-    global detonated
-    detonated = 0
+    global win_count
+    win_count = 0
     global board_of_bombs
     board_of_bombs = []
     for i in range(X):
@@ -237,6 +224,18 @@ def update_clock(root, clock):
     global timer, end
     timer += 1
     if timer >= time_limit:
+        losing = tk.Toplevel()
+        losing.geometry("400x50")
+        screen_width = losing.winfo_screenwidth()
+        screen_height = losing.winfo_screenheight()
+        x_cordinate = int((screen_width / 2) - (400 / 2))
+        y_cordinate = int((screen_height / 2) - (50 / 2))
+        losing.geometry("{}x{}+{}+{}".format(400, 50, x_cordinate, y_cordinate))
+        losing.resizable(False, False)
+        przegrana = tk.Label(losing, text="Przegrałeś!!!\n"
+                                          "Spróbuj ponowanie klikając START.", font="Times 18 italic bold")
+        przegrana.pack()
+        losing.after(5000, lambda: losing.destroy())
         toplev.destroy()
     if timer < 10:
         clock['text'] = "000" + str(timer)
@@ -260,11 +259,13 @@ def update_flag_counter(root, flag):
         flag['text'] = "00" + str(flags)
     elif flags < 1000:
         flag['text'] = "0" + str(flags)
+    else:
+        flag['text'] = "9999"
 
 
 # Funkcja inicjalizująca guziki
 def init_buttons(root):
-    buttons = [tk.Button(root, image=None, width=1, height=1) for i in range(X * Y)]
+    buttons = [tk.Button(root, fg='red', width=1, height=1) for i in range(X * Y)]
     for x in range(X):
         for y in range(Y):
             coordinate = y * X + x
@@ -310,15 +311,16 @@ def change(index, buttons, value, button):
     dy = index // X
     buttons[index].unbind('<Button-3>')
     buttons[index].unbind('<Button-1>')
+    if value != -1:
+        win_count += 1
     if value == 0:
-        if winn[dx][dy] == 0:
-            win_count += 1
-            winn[dx][dy] = 1
+        buttons[index].configure(bg="bisque")
         buttons[index] = tk.Label(root, bg="bisque")
         buttons[index].grid(column=dx + 1, row=dy + 1)
     else:
         buttons[index] = tk.Label(root, text=str(value), fg=number_colors(value))
         buttons[index].grid(column=dx + 1, row=dy + 1)
+
 
 def number_colors(value):
     if value == 1: return "blue4"
@@ -330,8 +332,9 @@ def number_colors(value):
     if value == 7: return "orange"
     if value == 8: return "dark khaki"
 
+
 def full(x, y, buttons, button):
-    global board_of_bombs, flags
+    global board_of_bombs, flags, win_count
     if board_of_bombs[x][y] == 0:
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
@@ -349,7 +352,6 @@ def full(x, y, buttons, button):
 
 
 def left_click_detonate(button, buttons):
-    print(win_count, bomb_count)
     index = buttons.index(button)
     dy = index // X
     dx = index % X
@@ -364,23 +366,33 @@ def left_click_detonate(button, buttons):
         full(dx, dy, buttons, button)
     if value == -1:
         losing = tk.Toplevel()
-        losing.geometry("300x50")
+        losing.geometry("400x50")
         screen_width = losing.winfo_screenwidth()
         screen_height = losing.winfo_screenheight()
-        x_cordinate = int((screen_width / 2) - (300 / 2))
+        x_cordinate = int((screen_width / 2) - (400 / 2))
         y_cordinate = int((screen_height / 2) - (50 / 2))
-        losing.geometry("{}x{}+{}+{}".format(300, 50, x_cordinate, y_cordinate))
+        losing.geometry("{}x{}+{}+{}".format(400, 50, x_cordinate, y_cordinate))
         losing.resizable(False, False)
         przegrana = tk.Label(losing, text="Przegrałeś!!!\n"
                                           "Spróbuj ponowanie klikając START.", font="Times 18 italic bold")
         przegrana.pack()
-        losing.after(3000, lambda:losing.destroy())
-
+        losing.after(5000, lambda: losing.destroy())
         toplev.destroy()
     else:
         change(index, buttons, value, button)
-    print(win_count, bomb_count)
-    if win_count == bomb_count:
+    if win_count == X*Y - bomb_count:
+        winning = tk.Toplevel()
+        winning.geometry("400x70")
+        screen_width = winning.winfo_screenwidth()
+        screen_height = winning.winfo_screenheight()
+        x_cordinate = int((screen_width / 2) - (400 / 2))
+        y_cordinate = int((screen_height / 2) - (70 / 2))
+        winning.geometry("{}x{}+{}+{}".format(400, 70, x_cordinate, y_cordinate))
+        winning.resizable(False, False)
+        winnek = tk.Label(winning, text="Wygrałeś!!! Gratulacje!!\n"
+                                        "Zagraj ponowanie klikając START.", font="Times 18 italic bold")
+        winnek.pack()
+        winning.after(5000, lambda: winning.destroy())
         toplev.destroy()
 
 
@@ -392,6 +404,7 @@ def right_click_flag(button, panel):
         flags += 1
     elif flags > 0:
         button['text'] = "F"
+
         flags -= 1
     update_flag_counter(root, panel[0])
 
@@ -399,4 +412,5 @@ def right_click_flag(button, panel):
 # Główny loop gry
 if __name__ == "__main__":
     root1 = start_screen()
+    zdjecie = tk.PhotoImage(file="buzka.png")
     root1.mainloop()

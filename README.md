@@ -4,7 +4,11 @@ Saper (innaczej Minesweeper) to gra komputerowa z **18** wieku, której zasady s
 - na każdym z odkrytych pól widnieje **liczba** min, które stykają się z tym polem,
 - odkryj wszystkie pola bez min, żeby **wygrać** grę
 ## ⚙️Instalacja
-...
+- `git clone ...`
+
+- `Zainstalowany Python3 i biblioteka Tkinter`
+
+- `python3 SUPERSAPER.py`
 ## 🎮 Jak grać?
 W ustawieniach znajdziesz 3 tryby trudności:
 - **easy** (20x10)

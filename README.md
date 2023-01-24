@@ -1,5 +1,5 @@
 # Super Saper
-Saper (innaczej Minesweeper) to gra komputerowa z **18** wieku, której zasady są bardzo proste:
+Saper (innaczej Minesweeper) to gra komputerowa z **20** wieku, której zasady są bardzo proste:
 - **odkrywaj** poszczególne pola planszy nie trafiając na minę,
 - na każdym z odkrytych pól widnieje **liczba** min, które stykają się z tym polem,
 - odkryj wszystkie pola bez min, żeby **wygrać** grę

@@ -48,7 +48,7 @@ def start_screen():
     zasady = tk.Button(root1, text=">JAK GRAĆ?<", height=2, width=20, command=zasadygry)
     zasady.pack()
     root1.resizable(False, False)
-    root1.iconphoto(False, tk.PhotoImage(file='flaga.png'))
+    root1.iconphoto(False, tk.PhotoImage(file='Grafika\\flaga.png'))
     return root1
 
 
@@ -68,7 +68,7 @@ def zasadygry():
                           "Źródło: https://pl.wikipedia.org/wiki/Saper_(gra_komputerowa)\n")
     label.pack()
     zasady.resizable(False, False)
-    zasady.iconphoto(False, tk.PhotoImage(file='znakzapytania.png'))
+    zasady.iconphoto(False, tk.PhotoImage(file='Grafika\\znakzapytania.png'))
     zasady.mainloop()
 
 
@@ -165,7 +165,7 @@ def init_window():
     x_cordinate = int((screen_width / 2) - (X * 25 / 2))
     y_cordinate = int((screen_height / 2) - (X * 20 / 2))
     root.geometry("{}x{}+{}+{}".format(X * 25, X * 20, x_cordinate, y_cordinate))
-    root.iconphoto(False, tk.PhotoImage(file='bomba.png'))
+    root.iconphoto(False, tk.PhotoImage(file='Grafika\\bomba.png'))
     flag = tk.Label(root, bg="black", fg="aquamarine", font=("Digital-7", 30))
     flag.grid(row=0, column=1, columnspan=6, ipadx=7, pady=35)
     update_flag_counter(root, flag)
@@ -412,6 +412,6 @@ def right_click_flag(button, panel):
 # Główny loop gry
 if __name__ == "__main__":
     root1 = start_screen()
-    zebatka = tk.PhotoImage(file='zebatka.png')
-    zdjecie = tk.PhotoImage(file="buzka2.png")
+    zebatka = tk.PhotoImage(file='Grafika\\zebatka.png')
+    zdjecie = tk.PhotoImage(file="Grafika\\buzka2.png")
     root1.mainloop()

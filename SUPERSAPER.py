@@ -84,7 +84,7 @@ def set_size(x):
 def set_time(x):
     global tbg, time_limit
     time_limit = x * 60
-    tbg.itemconfigure(1, text=str(time_limit))
+    tbg.itemconfigure(1, text=str(time_limit)+'s')
 
 
 def size_settings():
@@ -114,7 +114,7 @@ def size_settings():
     tbg = tk.Canvas(siz, height=150, width=120, bg='white')
     tbg.pack(pady=0)
     tbg.create_text((60, 55), anchor='center', text="20 x 10", fill='black', font='Digital-7 20 bold')
-    siz.iconphoto(False, tk.PhotoImage(file='zebatka.png'))
+    siz.iconphoto(False, zebatka)
     siz.mainloop()
 
 
@@ -147,10 +147,9 @@ def time_settings():
     q2 = tk.Button(tim, text='ok', command=lambda: tim.destroy())
     q2.pack(in_=bottom, side=tk.LEFT, padx=5)
     global tbg
-    tbg = tk.Canvas(tim, height=100, width=300, bg='black')
+    tbg = tk.Canvas(tim, height=100, width=300, bg='white')
     tbg.pack(pady=10)
-    tbg.create_text((150, 40), text=str(300), fill='aquamarine', font='Digital-7 20 bold')
-    tim.iconphoto(False, tk.PhotoImage(file='zebatka.png'))
+    tbg.create_text((150, 40), text=str(300)+'s', font='Digital-7 20 bold')
     tim.mainloop()
 
 
@@ -168,13 +167,13 @@ def init_window():
     root.geometry("{}x{}+{}+{}".format(X * 25, X * 20, x_cordinate, y_cordinate))
     root.iconphoto(False, tk.PhotoImage(file='bomba.png'))
     flag = tk.Label(root, bg="black", fg="aquamarine", font=("Digital-7", 30))
-    flag.grid(row=0, column=1, columnspan=7, ipadx=7, pady=25)
+    flag.grid(row=0, column=1, columnspan=6, ipadx=7, pady=35)
     update_flag_counter(root, flag)
     face = tk.Button(root, image=zdjecie)
-    face.grid(row=0, column=(X // 2) - 1, columnspan=3, pady=25)
+    face.grid(row=0, column=(X // 2) - 1, columnspan=3, pady=35)
     face.bind('<Button-1>', lambda event: reset_game(root))
     clock = tk.Label(root, bg="black", fg="aquamarine", font=("Digital-7", 30))
-    clock.grid(row=0, column=X - 6, columnspan=7, ipadx=7, pady=25)
+    clock.grid(row=0, column=X - 5, columnspan=6, ipadx=7, pady=35)
     update_clock(root, clock)
     panel = [flag, face, clock]
     buttons = [tk.Button(root, image=None, width=1, height=1) for i in range(X * Y)]
@@ -221,21 +220,22 @@ def reset_game(root):
 
 # Funkcja licząca czas gry
 def update_clock(root, clock):
-    global timer, end
+    global timer, end, time_limit
     timer += 1
     if timer >= time_limit:
-        losing = tk.Toplevel()
-        losing.geometry("400x50")
-        screen_width = losing.winfo_screenwidth()
-        screen_height = losing.winfo_screenheight()
+        timer = 0
+        losink = tk.Toplevel()
+        losink.geometry("400x50")
+        screen_width = losink.winfo_screenwidth()
+        screen_height = losink.winfo_screenheight()
         x_cordinate = int((screen_width / 2) - (400 / 2))
         y_cordinate = int((screen_height / 2) - (50 / 2))
-        losing.geometry("{}x{}+{}+{}".format(400, 50, x_cordinate, y_cordinate))
-        losing.resizable(False, False)
-        przegrana = tk.Label(losing, text="Przegrałeś!!!\n"
+        losink.geometry("{}x{}+{}+{}".format(400, 50, x_cordinate, y_cordinate))
+        losink.resizable(False, False)
+        przegranak = tk.Label(losink, text="Przegrałeś!!!\n"
                                           "Spróbuj ponowanie klikając START.", font="Times 18 italic bold")
-        przegrana.pack()
-        losing.after(5000, lambda: losing.destroy())
+        przegranak.pack()
+        losink.after(5000, lambda: losink.destroy())
         toplev.destroy()
     if timer < 10:
         clock['text'] = "000" + str(timer)
@@ -412,5 +412,6 @@ def right_click_flag(button, panel):
 # Główny loop gry
 if __name__ == "__main__":
     root1 = start_screen()
-    zdjecie = tk.PhotoImage(file="buzka.png")
+    zebatka = tk.PhotoImage(file='zebatka.png')
+    zdjecie = tk.PhotoImage(file="buzka2.png")
     root1.mainloop()
